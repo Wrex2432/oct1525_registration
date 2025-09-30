@@ -1,5 +1,5 @@
 /* Your Google Apps Script Web App URL (keep using yours) */
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbw6lmaeFELmHGNikmOIvwsKFsSQK4N_tNdjcla6S_ezmkS3f-419dYCW2OMKzSxsQ7N/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzoFyz_5MgxV4tuaeWbxyhnxEZy2dl3elB_Tzf7Gc7oYt4-191bBhQJBFeFDj5LFYOK/exec';
 
 /* ---- Security helpers ---- */
 // Double-submit cookie: set + mirror to hidden field; server should verify equality.
