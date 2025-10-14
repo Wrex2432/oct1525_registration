@@ -1,0 +1,84 @@
+/* =========================================================
+   animation.css — View Transitions (Intro → Form → Thanks)
+   - No page scroll; panes are stacked full-viewport
+   - We ANIMATE ONLY:
+       • Form card (translateY)
+       • Form/Thanks shared BG (opacity via ::before)
+       • Thanks image (pop-in)
+   - Motion-safe: honors prefers-reduced-motion
+   ========================================================= */
+
+/* ---------- Timing & easing tokens ---------- */
+:root{
+  --anim-enter-dur: 700ms;            /* form card fall-in */
+  --anim-leave-dur: 700ms;            /* form card exit-up */
+  --anim-bg-dur:    600ms;            /* shared bg fade-in */
+  --anim-pop-dur:   420ms;            /* Thanks image pop */
+
+  --ease-fall:      cubic-bezier(.20,.95,.20,1.00);
+  --ease-leave:     cubic-bezier(.20,.95,.20,1.00);
+  --ease-fade:      cubic-bezier(.22,.61,.36,1);
+  --ease-pop:       cubic-bezier(.15,.85,.20,1);
+}
+
+/* ---------- Defaults / safety ---------- */
+/* Keep the form BG invisible unless we're actively showing Form or Thanks */
+.pane--form::before { opacity: 0; }
+
+/* For sanity, ensure the card is in its natural place by default */
+.pane--form .card {
+  transform: translateY(0);
+  will-change: transform;
+}
+
+/* ---------- PREP: before the Form enters ---------- */
+/* JS sets .stacker.form-prep temporarily to force a true off-screen start */
+.stacker.form-prep .pane--form::before {
+  opacity: 0; /* BG is hidden at the start */
+}
+.stacker.form-prep .pane--form .card {
+  transform: translateY(-105%); /* start above the viewport */
+}
+
+/* ---------- ENTER: Intro → Form ---------- */
+/* JS swaps .form-prep → .is-form on the next frame */
+.stacker.is-form .pane--form::before {
+  opacity: 1; /* BG fades in and fully covers State 1 */
+  transition: opacity var(--anim-bg-dur) var(--ease-fade);
+}
+
+.stacker.is-form .pane--form .card {
+  transform: translateY(0);
+  transition: transform var(--anim-enter-dur) var(--ease-fall);
+}
+
+/* ---------- LEAVE: Form → Thanks ---------- */
+/* JS adds .form-leave, waits for card transitionend, then swaps to Thanks */
+.stacker.form-leave .pane--form .card {
+  transform: translateY(-105%); /* slide the card up and out */
+  transition: transform var(--anim-leave-dur) var(--ease-leave);
+}
+
+/* ---------- THANKS: image pop-in ---------- */
+/* When the Thanks view becomes visible, pop the image */
+#view-thanks.is-active .thanks-pop {
+  animation: s3-pop var(--anim-pop-dur) var(--ease-pop) both;
+}
+
+@keyframes s3-pop{
+  from { opacity: 0; transform: translateY(8px) scale(.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  .pane--form::before,
+  .pane--form .card {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Snap to end states */
+  .stacker.form-prep .pane--form .card { transform: translateY(0); }
+  #view-thanks.is-active .thanks-pop { opacity: 1; transform: none; }
+}

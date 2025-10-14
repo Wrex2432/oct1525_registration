@@ -1,175 +1,301 @@
-/* ------------------------------
-Modern CSS reset (compact)
---------------------------------*/
+/* =========================================================
+   GIGIL Metama — Registration
+   style.css (structure + visuals only)
+   Animations live in animation.css
+   ========================================================= */
+
+/* 0) Reset & viewport lock */
 *, *::before, *::after { box-sizing: border-box; }
-* { margin: 0; }
-html:focus-within { scroll-behavior: smooth; }
-body { min-height: 100vh; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-img, picture, video, canvas, svg { display: block; max-width: 100%; }
-input, button, textarea, select { font: inherit; color: inherit; }
-button { background: none; border: 0; padding: 0; }
-a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid #4285F4; outline-offset: 2px; }
+* { margin: 0; font-family: Helvetica, Arial, sans-serif;}
+html, body { height: 100%; overflow: hidden; }
 
-/* ------------------------------
-Design tokens (Google palette)
---------------------------------*/
+/* 1) Design Tokens */
 :root{
-  /* Brand */
-  --google-blue:   #4285F4;
-  --google-red:    #DB4437;
-  --google-yellow: #F4B400;
-  --google-green:  #0F9D58;
+  /* Palette */
+  --bg-app:        #EB008B;
+  --card-bg:       #F3F2E4;
+  --field-bg:      #D1D1C5;
+  --brand-pink:    #ff1389;
+  --cta:           #7116B9;
+  --copy:          #635a5a;
+  --muted:         #444444;
+  --accent-check:  #7116B9;
+  --accent-error:  #e53935;
+  --checkbox-text: #EB008B;
 
-  /* Semantic */
-  --accent: var(--google-blue);
-  --success: var(--google-green);
-  --danger: var(--google-red);
-  --warn: var(--google-yellow);
+  /* Viewport helpers (JS can sync to innerHeight) */
+  --pane-h: 100vh;
 
-  /* Neutrals (light) */
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --text: #1f2328;
-  --muted: #5f6b7a;
-  --border: #dde1e6;
-  --shadow: 0 6px 20px rgba(0,0,0,.06);
+  /* Background assets */
+  --s1-bg-image:     url("assets/BG_stateA.png"); /* S1 only */
+  --shared-bg-image: url("assets/BG_stateB.png"); /* S2 + S3 */
 
-  /* Layout + shape */
-  --radius: 6px;        /* square-ish */
-  --input-radius: 6px;
-  --space-1: 8px;
-  --space-2: 12px;
-  --space-3: 16px;
-  --space-4: 20px;
-  --space-5: 24px;
-  --container-max: 560px;
+  /* Start button art */
+  --start-btn-idle:    url("assets/Button_Eye_Idle.png");
+  --start-btn-pressed: url("assets/Button_Eye_Press.png");
+  --start-btn-w: 260px;
+  --start-btn-h: 84px;
 
-  /* Typography */
-  --h1: 22px;
-  --body: 15px;
-  --label: 13px;
+  /* Spacing / radius / type */
+  --space-1: 8px;  --space-2: 12px; --space-3: 16px; --space-4: 24px;
+  --radius-1: 12px; --radius-2: 16px; --radius-3: 18px; --radius-4: 28px;
+  --fs-1: 13px; --fs-2: 16px; --fs-3: 22px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 0 rgba(0,0,0,.02), 0 8px 24px rgba(0,0,0,.06);
+
+  /* === S3 (Thanks) Controls === */
+  --s3-img-maxw: 78vw;   /* max width of Thanks.png */
+  --s3-img-pad:  24px;   /* padding around center content */
 }
 
-/* Dark mode tokens */
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg: #0f1115;
-    --surface: #171a21;
-    --text: #e6e6e6;
-    --muted: #a0a4ae;
-    --border: #222733;
-    --shadow: 0 10px 30px rgba(0,0,0,.25);
-  }
-}
-
-/* ------------------------------
-Page layout
---------------------------------*/
-body{
-  background: var(--bg);
-  color: var(--text);
+/* 2) Base page */
+body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  color: var(--copy);
+  background: var(--bg-app);
+}
+
+/* View toggling (JS adds .is-active) */
+.view { display: none; }
+.view.is-active { display: block; }
+
+/* 3) Stacker layout (S1 intro + S2 form panes) */
+.stacker{
+  position: relative;
+  width: 100%;
+  height: var(--pane-h, 100vh); /* updated by JS */
+  overflow: hidden;             /* clip anything that escapes */
+}
+.pane{
+  position: absolute;
+  inset: 0;          /* top:0 right:0 bottom:0 left:0 */
+  width: 100%;
+  height: 100%;
+}
+.pane--intro { z-index: 1; }
+.pane--form  { z-index: 2; }
+.stacker.is-intro .pane--intro { pointer-events: auto; z-index: 2; }
+.stacker.is-form  .pane--form  { pointer-events: auto; z-index: 2; }
+.stacker.form-leave .pane--form { pointer-events: none; z-index: 2; }
+
+/* 4) Components */
+.card{
+  padding: 18px;
+  background: var(--card-bg);
+  border-bottom-left-radius: var(--radius-4);
+  border-bottom-right-radius: var(--radius-4);
+  box-shadow: var(--shadow-card);
+  display: flex;
+}
+#regForm{
+  display: grid;
+  gap: 22px;
+  width: 100%;
+  align-content: bottom;
+  margin-top: 60px; /* Adapt to the notch above iphone 14 pro max screens */
+}
+.name-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.name-row .field:first-child { border-radius: var(--radius-3) 0 0 var(--radius-3); }
+.name-row .field:last-child  { border-radius: 0 var(--radius-3) var(--radius-3) 0; }
+
+.field{
+  display: block;
+  background: var(--field-bg);
+  border-radius: var(--radius-3);
+}
+.field input{
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 14px 16px;
+  font-size: 1.2rem;
+  color: var(--copy);
+}
+.field input::placeholder{
+  color: #5b5b5b;
+}
+
+.check{
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-2);
+  line-height: 1.25;
+  color: var(--checkbox-text);
+  padding: 4px 2px;
+}
+.check input{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 23px;
+  height: 23px;
+  margin-top: 1px;
+  border-radius: 6px;
+  border: 0px solid color-mix(in oklab, var(--accent-check), black 35%);
+  background: var(--field-bg);
   display: grid;
   place-items: center;
-  padding: max(var(--space-5), env(safe-area-inset-top));
-  line-height: 1.45;
-  font-size: var(--body);
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .12s ease;
 }
-.card{
-  width: 100%;
-  max-width: var(--container-max);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: clamp(var(--space-4), 4vw, 28px);
-  margin: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+.check input[type="checkbox"]:checked{
+  background: url("data:image/svg+xml;utf8,\ <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'>\<path d='M5 10.5 8.5 14 15 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/>\</svg>") center/14px 14px no-repeat,
+    var(--accent-check);
 }
-.brand-bar{
-  height: 4px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  background:
-    linear-gradient(90deg,
-    var(--google-blue) 0%,
-    var(--google-red) 25%,
-    var(--google-yellow) 50%,
-    var(--google-green) 75%,
-    var(--google-blue) 100%);
-  margin: -1px -1px var(--space-4) -1px; /* bleed over 1px border */
-}
-h1{ font-size: var(--h1); margin-bottom: var(--space-2); font-weight: 700; }
-.lead{ color: var(--muted); margin-bottom: var(--space-4); }
 
-/* ------------------------------
-Form
---------------------------------*/
-form{ display: grid; gap: var(--space-3); }
-.hp{ position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-
-label{
-  display: block;
-  font-size: var(--label);
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-.field{ display: grid; gap: 6px; }
-.row{ display: grid; gap: var(--space-3); }
-@media (min-width: 560px){ .row{ grid-template-columns: 1fr 1fr; } }
-
-input[type="text"],
-input[type="email"],
-input[type="tel"]{
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--input-radius);
-  background: #fff;
-  color: var(--text);
-}
-@media (prefers-color-scheme: dark){
-  input[type="text"],
-  input[type="email"],
-  input[type="tel"]{
-    background: #0d1016;
-  }
-}
-input::placeholder{ color: #9aa4b2; }
-
-.actions{ display: grid; gap: 8px; margin-top: var(--space-2); }
-.btn{
-  width: 100%;                 /* full width submit */
-  padding: 12px 16px;
-  border-radius: var(--radius);
-  background: var(--accent);
+.btn, .hero-btn{
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--cta);
   color: #fff;
   font-weight: 700;
-  border: 1px solid color-mix(in hsl, var(--accent) 90%, black 10%);
+  border: 0;
+  border-radius: var(--radius-2);
   cursor: pointer;
-  transition: transform .02s ease, filter .15s ease;
 }
-.btn:active{ transform: translateY(1px); }
-.btn[disabled]{ opacity: .6; cursor: not-allowed; }
-
-@media (prefers-reduced-motion: reduce){
-  .btn{ transition: none; }
+#submitBtn{
+  margin: 0 84px;
+  font-size: 1.2rem;
 }
-
-.msg{ font-size: 14px; }
-.msg.ok{ color: var(--success); }
-.msg.err{ color: var(--danger); }
-
-.footer{
-  margin-top: var(--space-3);
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
+.hero-btn{
+  width: var(--start-btn-w);
+  height: var(--start-btn-h);
+  padding: 0;
+  background: center / contain no-repeat var(--start-btn-idle);
+  border-radius: 0;
 }
 
-/* Optional “color pickers” to swap primary at runtime */
-.accent-pills{ display: flex; gap: 8px; justify-content: flex-end; margin-bottom: var(--space-2); }
-.pill{ width: 14px; height: 14px; border-radius: 3px; border: 1px solid #d0d7de; cursor: pointer; }
-.pill.blue{   background: var(--google-blue); }
-.pill.red{    background: var(--google-red); }
-.pill.yellow{ background: var(--google-yellow); }
-.pill.green{  background: var(--google-green); }
+/* 5) State visuals */
+/* ---------- S1: Intro ---------- */
+.s1-root{ position: relative; }
+.s1-root::before{
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--s1-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.s1-root .center-wrap{
+  min-height: var(--pane-h);
+  position: relative;
+}
+.s1-root .center-content{
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+}
+
+/* ---------- S2: Form ---------- */
+.pane--form{ position: relative; }
+
+.pane--form::before{
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--shared-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+.pane--form .screen{
+  position: relative; z-index: 1;
+  min-height: var(--pane-h);
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+.pane--form .brand-footer{
+  opacity: 0; pointer-events: none;
+  height: 200px; /* hidden on form view */
+}
+
+/* ---------- S3: Thanks (separate view) ---------- */
+.s3-root{ position: relative; }
+.s3-root::before{
+  content: "";
+  position: absolute; inset: 0;
+  background-image: var(--shared-bg-image); /* SAME AS S2 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+.s3-root .center-wrap{
+  min-height: var(--pane-h);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  position: relative;
+  z-index: 1;
+}
+.s3-root .center-content{
+  display: grid;
+  place-items: center;
+  padding: var(--s3-img-pad);
+}
+.s3-root .thanks-img{
+  max-width: var(--s3-img-maxw);
+  height: auto;
+  display: block;
+}
+
+/* 6) Responsive (tiny phones) */
+@media (max-width: 390px){
+  .card { padding: 14px; }
+  .field input { padding: 12px 14px; font-size: 15px; }
+  .btn, .hero-btn { padding: 12px 22px; }
+}
+
+
+/* === PANCAKE STACK: make S1 and S2 occupy the SAME coordinates === */
+
+/* The container we anchor absolute panes to */
+.stacker,
+#stacker {
+  position: relative;
+  width: 100%;
+  height: var(--pane-h, 100vh);
+  overflow: hidden;           /* never show the “bottom” */
+}
+
+/* Ensure the inner track never offsets the panes */
+#stackTrack {
+  position: static;           /* no coordinate system change */
+  transform: none !important; /* kill any legacy transforms */
+  height: 100%;
+}
+
+/* Both panes pin to the exact same rect of the stacker */
+.pane {
+  position: absolute;
+  inset: 0;                   /* top/right/bottom/left = 0 */
+  width: 100%;
+  height: 100%;
+}
+
+/* Default layering (JS will still flip these with .is-intro / .is-form) */
+.pane--intro { z-index: 1; }
+.pane--form  { z-index: 2; }
+
+/* Keep your existing toggles; reiterating the intent for clarity */
+.stacker.is-intro .pane--intro { z-index: 4; pointer-events: auto; }
+.stacker.is-intro .pane--form  { z-index: 1; pointer-events: none; }
+
+.stacker.is-form  .pane--form  { z-index: 5; pointer-events: auto; }
+.stacker.is-form  .pane--intro { z-index: 1; pointer-events: none; }
+
+/* While leaving the form (card slides up), keep it on top to complete the exit */
+.stacker.form-leave .pane--form { z-index: 5; }

@@ -8,139 +8,182 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbzoFyz_5MgxV4tuaeWbxyhn
   let token = '';
   try { token = crypto.randomUUID(); } catch { token = String(Date.now()) + Math.random().toString(16).slice(2); }
   document.cookie = `${key}=${token}; Path=/; SameSite=Lax`;
-  const csrf = document.getElementById('csrf');
+  const csrf = document.getElementById('csrf'); // optional hidden <input id="csrf">
   if (csrf) csrf.value = token;
 })();
 
-// Trim/sanitize utility
-const clean = (s) => s.replace(/\s+/g,' ').trim();
-
-// Email validator (simple)
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-// Normalize phone to a digits-only international-ish format (keeps + at start)
+/* ---- Utils ---- */
+const clean = (s = '') => String(s).replace(/\s+/g,' ').trim();
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
 function normalizePhone(input){
   if(!input) return '';
-  let s = input.trim();
-  s = s.replace(/[^\d+]/g, '');
-  // If it starts with 0 and not +, you may map it (example: PH 0 -> +63). Keeping generic:
-  return s;
+  let s = String(input).trim();
+  return s.replace(/[^\d+]/g, ''); // keep leading + and digits
 }
 
-// Custom validity messages
-function attachValidation(){
-  const fullName = document.getElementById('fullName');
-  const position = document.getElementById('position');
-  const company  = document.getElementById('company');
-  const email    = document.getElementById('email');
-  const phone    = document.getElementById('phone');
-
-  const setMsg = (el, msg) => { el.setCustomValidity(msg); el.reportValidity(); };
-
-  fullName.addEventListener('input', () => {
-    fullName.value = fullName.value.replace(/\s{2,}/g,' ');
-    if(fullName.validity.patternMismatch || fullName.value.trim().length < 2){
-      setMsg(fullName, 'Use letters, spaces, hyphens, apostrophes. Min 2 characters.');
-    } else setMsg(fullName, '');
-  });
-
-  [position, company].forEach(el => {
-    el.addEventListener('input', () => {
-      if(el.value.trim().length < 2) setMsg(el, 'Please enter at least 2 characters.');
-      else setMsg(el, '');
-    });
-  });
-
-  email.addEventListener('input', () => {
-    email.value = email.value.trim();
-    if(!isValidEmail(email.value)) setMsg(email, 'Enter a valid email like name@example.com.');
-    else setMsg(email, '');
-  });
-
-  phone.addEventListener('input', () => {
-    // Allow user-friendly typing; final normalization on submit
-    const raw = phone.value;
-    if(raw && !/^\+?[0-9\s\-()]{7,20}$/.test(raw)){
-      setMsg(phone, 'Use digits, spaces, dashes, parentheses. 7–20 chars.');
-    } else setMsg(phone, '');
-  });
+/* ---- Error UI (inline styles; no CSS changes needed) ---- */
+function setErrorField(inputEl) {
+  const fieldWrap = inputEl.closest('.field') || inputEl;
+  fieldWrap.style.border = '2px solid #e53935';
+  fieldWrap.style.boxShadow = '0 0 0 1px rgba(229,57,53,.12) inset';
+  inputEl.setAttribute('aria-invalid', 'true');
 }
-attachValidation();
+function clearErrorField(inputEl) {
+  const fieldWrap = inputEl.closest('.field') || inputEl;
+  fieldWrap.style.border = '';
+  fieldWrap.style.boxShadow = '';
+  inputEl.removeAttribute('aria-invalid');
+}
+function setErrorCheck(checkEl) {
+  const labelWrap = checkEl.closest('.check') || checkEl.parentElement || checkEl;
+  labelWrap.style.outline = '2px solid #e53935';
+  labelWrap.style.outlineOffset = '4px';
+  checkEl.style.accentColor = '#e53935';
+  checkEl.setAttribute('aria-invalid', 'true');
+}
+function clearErrorCheck(checkEl) {
+  const labelWrap = checkEl.closest('.check') || checkEl.parentElement || checkEl;
+  labelWrap.style.outline = '';
+  labelWrap.style.outlineOffset = '';
+  checkEl.style.accentColor = '';
+  checkEl.removeAttribute('aria-invalid');
+}
 
-/* ---- Form submit ---- */
+/* ---- Form wiring ---- */
 const form = document.getElementById('regForm');
-const btn  = document.getElementById('submitBtn');
-const msg  = document.getElementById('msg');
-
+const msg  = document.getElementById('msg');        // optional <div id="msg">
 function setStatus(kind, text){
+  if (!msg) { if (kind === 'err') alert(text); return; }
   msg.classList.remove('ok','err');
   if(kind === 'ok') msg.classList.add('ok');
   if(kind === 'err') msg.classList.add('err');
   msg.textContent = text;
 }
-function clearStatus(){
-  msg.classList.remove('ok','err');
-  msg.textContent = '';
+function clearStatus(){ if (msg){ msg.classList.remove('ok','err'); msg.textContent = ''; } }
+
+/* Required fields in the form view */
+const REQUIRED_FIELDS = ['firstName','lastName','position','company','workEmail']; // phone optional
+const REQUIRED_CHECKS = ['consent1','consent2'];                                   // both required
+
+function validateAll() {
+  let ok = true;
+  let firstErrorEl = null;
+
+  // Clear previous visuals
+  REQUIRED_FIELDS.forEach(name => {
+    const el = form?.elements[name];
+    if (el) clearErrorField(el);
+  });
+  REQUIRED_CHECKS.forEach(name => {
+    const el = form?.elements[name];
+    if (el) clearErrorCheck(el);
+  });
+
+  // Fields
+  REQUIRED_FIELDS.forEach(name => {
+    const el = form?.elements[name];
+    if (!el) return;
+    const val = clean(el.value);
+    const missing = val.length === 0;
+    const badEmail = (name === 'workEmail') && !isValidEmail(val);
+    if (missing || badEmail) {
+      setErrorField(el);
+      ok = false;
+      if (!firstErrorEl) firstErrorEl = el;
+    }
+  });
+
+  // Optional phone sanity
+  const phoneEl = form?.elements['phone'];
+  if (phoneEl) {
+    const normalized = normalizePhone(phoneEl.value);
+    if (normalized && (normalized.length < 7 || normalized.length > 20)) {
+      setErrorField(phoneEl);
+      ok = false;
+      if (!firstErrorEl) firstErrorEl = phoneEl;
+    }
+  }
+
+  // Checkboxes
+  REQUIRED_CHECKS.forEach(name => {
+    const el = form?.elements[name];
+    if (el && !el.checked) {
+      setErrorCheck(el);
+      ok = false;
+      if (!firstErrorEl) firstErrorEl = el;
+    }
+  });
+
+  if (!ok && firstErrorEl) {
+    firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => firstErrorEl.focus?.({ preventScroll: true }), 200);
+  }
+  return ok;
 }
 
-form.addEventListener('submit', async (e) => {
+/* Live clearing */
+form?.addEventListener('input', (e) => {
+  const t = e.target;
+  if (!(t instanceof HTMLElement)) return;
+  if (t.closest('.field')) clearErrorField(t);
+});
+form?.addEventListener('change', (e) => {
+  const t = e.target;
+  if (!(t instanceof HTMLElement)) return;
+  if (t.matches('input[type="checkbox"]')) clearErrorCheck(t);
+});
+
+/* Submit -> on success, go to Thank You state */
+form?.addEventListener('submit', async (e) => {
   e.preventDefault();
   clearStatus();
 
-  // bot trap
+  // honeypot
   const hp = form.querySelector('input[name="website"]');
   if (hp && hp.value.trim() !== '') { setStatus('err','Submission blocked.'); return; }
 
-  const fullName = clean(document.getElementById('fullName').value);
-  const position = clean(document.getElementById('position').value);
-  const company  = clean(document.getElementById('company').value);
-  const email    = clean(document.getElementById('email').value).toLowerCase();
-  const phone    = normalizePhone(document.getElementById('phone').value);
-  const csrf     = document.getElementById('csrf').value;
+  if (!validateAll()) return;
 
-  // Required checks
-  if(!fullName || !position || !company || !email){
-    setStatus('err','Please complete all required fields.'); return;
-  }
-  if(!isValidEmail(email)){
-    setStatus('err','Please enter a valid email address.'); return;
-  }
-  // Optional phone format sanity (if provided)
-  if(phone && (phone.length < 7 || phone.length > 20)){
-    setStatus('err','Phone should be 7–20 characters long.'); return;
-  }
+  // Build payload expected by your GAS
+  const firstName = clean(form.elements['firstName']?.value);
+  const lastName  = clean(form.elements['lastName']?.value);
+  const fullName  = clean(`${firstName} ${lastName}`);
+  const position  = clean(form.elements['position']?.value);
+  const company   = clean(form.elements['company']?.value);
+  const email     = clean(form.elements['workEmail']?.value).toLowerCase(); // map to GAS 'email'
+  const phone     = normalizePhone(form.elements['phone']?.value || '');
+  const csrf      = document.getElementById('csrf')?.value || '';
 
-  // Network timeout (avoids hanging)
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
+
+  // Network timeout
   const ac = new AbortController();
-  const t  = setTimeout(() => ac.abort(), 15000);
+  const to = setTimeout(() => ac.abort(), 15000);
 
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
-
-  try{
-    const res = await fetch(GAS_URL, {
+  try {
+    await fetch(GAS_URL, {
       method: 'POST',
-      // Keep 'no-cors' if your Apps Script isn't sending CORS headers.
-      // If you add CORS on the server, switch to 'cors' and read JSON.
-      mode: 'no-cors',
+      mode: 'no-cors', // keep if GAS doesn't send CORS headers
       headers: {
         'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest' // hint for server
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify({ fullName, position, company, email, phone, csrf }),
       signal: ac.signal
     });
 
-    // With 'no-cors' the response is opaque; assume success if no exception.
-    setStatus('ok','Thanks! Your registration has been recorded.');
+    // Assume success if no exception with no-cors
     form.reset();
+    setStatus('ok','Thanks! Your registration has been recorded.');
+    // switch to Thank You state
+    window.AppState?.goTo('thanks');
   } catch (err){
     console.error(err);
     if (err.name === 'AbortError') setStatus('err','Network timeout. Please try again.');
     else setStatus('err','Something went wrong. Please try again.');
   } finally {
-    clearTimeout(t);
-    btn.disabled = false;
-    btn.textContent = 'Submit';
+    clearTimeout(to);
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
   }
 });

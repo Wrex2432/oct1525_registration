@@ -2,100 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Oct 15 - Registration</title>
-
-  <!-- Viewport + iOS safe behaviors -->
+  <title>GIGIL Metama | Registration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="format-detection" content="telephone=no,email=no,address=no" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#4285F4" />
 
-  <!-- Security headers (client-hints via meta; best set at host, too) -->
-  <meta http-equiv="Content-Security-Policy"
-        content="
-          default-src 'none';
-          style-src   'self';
-          script-src  'self';
-          img-src     'self' data:;
-          connect-src https://script.google.com https://script.googleusercontent.com;
-          base-uri    'none';
-          form-action 'none';
-          frame-ancestors 'none';
-          upgrade-insecure-requests;
-        ">
-  <meta http-equiv="Referrer-Policy" content="no-referrer" />
-  <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=()" />
-
-  <!-- Preconnect for faster first POST to GAS -->
-  <link rel="preconnect" href="https://script.google.com" crossorigin>
-  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
-
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./script.js"></script>
+  <!-- Base styles -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Animations (track slides here) -->
+  <link rel="stylesheet" href="animation.css" />
 </head>
 <body>
-  <main class="card" role="main">
-    <div class="brand-bar" aria-hidden="true"></div>
+  <!-- Optional spacer if you have a fixed header elsewhere -->
+  <div class="safe-top-spacer go-away" aria-hidden="true"></div>
 
-    <h1>Event Registration</h1>
-    <p class="lead">Fill in your details and tap Submit. Your record will be saved to Google Sheets.</p>
+  <!-- ======================================================
+       STACKED VIEW: INTRO (state 1) + FORM (state 2)
+       Both panes are always in DOM. Intro sits above Form.
+       We slide the inner .stack-track, not the viewport.
+  ======================================================= -->
+  <main id="view-stacked" class="view is-active" aria-label="Intro and Form">
+    <div id="stacker" class="stacker">
+      <div id="stackTrack" class="stack-track">
 
-    <form id="regForm" novalidate>
-      <!-- Honeypot -->
-      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" />
+        <!-- ----- State 1: INTRO (top pane) ----- -->
+        <section id="introPane" class="pane pane--intro s1-root">
+          <!-- TOP LOGO -->
+          <div class="center-wrap">
+            <section class="center-content">
+              <!-- Image-based button (idle/pressed handled via CSS/JS) -->
+              <button id="startBtn" class="hero-btn" aria-label="Start registration">
+                <span class="sr-only"></span>
+              </button>
+            </section>
 
-      <div class="field">
-        <label for="fullName">Full Name *</label>
-        <input id="fullName" name="fullName" type="text"
-               placeholder="" required
-               inputmode="text" autocapitalize="words" autocomplete="name"
-               minlength="2" maxlength="100"
-               pattern="^[A-Za-zÀ-ÖØ-öø-ſ'’\-\. ]{2,100}$" />
+            <!-- Bottom brand (optional, you can keep or remove) -->
+            <!-- <footer class="brand-footer" aria-label="Brand">
+              <img src="logo-placeholder.svg" alt="gigil metama logo" />
+            </footer> -->
+          </div>
+        </section>
+
+
+        <!-- ----- State 2: FORM (bottom pane) ----- -->
+        <section id="formPane" class="pane pane--form">
+          <section class="screen">
+            <section class="card" role="form" aria-label="Registration form">
+              <form id="regForm" novalidate>
+                <!-- hidden CSRF + honeypot -->
+                <input type="hidden" id="csrf" name="csrf" />
+                <input type="text" name="website" autocomplete="off" tabindex="-1" aria-hidden="true"
+                       style="position:absolute;left:-9999px;opacity:0" />
+
+                <div class="name-row">
+                  <label class="field">
+                    <input type="text" name="firstName" placeholder="First Name" required />
+                  </label>
+                  <label class="field">
+                    <input type="text" name="lastName" placeholder="Last Name" required />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <input type="text" name="position" id="position" placeholder="Position" required />
+                </label>
+
+                <label class="field">
+                  <input type="text" name="company" id="company" placeholder="Company" required />
+                </label>
+
+                <label class="field">
+                  <input type="email" name="workEmail" id="workEmail" placeholder="Work Email" required />
+                </label>
+
+                <label class="field">
+                  <input type="tel" name="phone" id="phone" placeholder="Phone Number" inputmode="tel" />
+                </label>
+
+                <label class="check">
+                  <input type="checkbox" name="consent1" />
+                  <span>I hereby grant permission to GIGIL Metama and Globaltronics to contact me regarding business inquiries or opportunities.</span>
+                </label>
+
+                <label class="check">
+                  <input type="checkbox" name="consent2" />
+                  <span>I hereby grant permission for my image and likeness to be captured in photos and videos taken during the event.</span>
+                </label>
+
+                <button id="submitBtn" class="btn" type="submit">Submit</button>
+                <div id="msg" aria-live="polite" style="margin-top:8px;"></div>
+              </form>
+            </section>
+
+            <!-- Bottom logo bar (State 2) -->
+            <footer class="brand-footer s2-footer" aria-label="Brand">
+              <img src="logo-placeholder.svg" alt="gigil metama logo" />
+            </footer>
+
+          </section>
+        </section>
+
       </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="position">Position *</label>
-          <input id="position" name="position" type="text"
-                 placeholder="" required
-                 inputmode="text" autocomplete="organization-title"
-                 minlength="2" maxlength="80" />
-        </div>
-        <div class="field">
-          <label for="company">Company *</label>
-          <input id="company" name="company" type="text"
-                 placeholder="" required
-                 inputmode="text" autocomplete="organization"
-                 minlength="2" maxlength="120" />
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="email">Email Address *</label>
-        <input id="email" name="email" type="email"
-               placeholder="" required
-               inputmode="email" autocomplete="email" maxlength="254" />
-      </div>
-
-      <div class="field">
-        <label for="phone">Phone Number (optional)</label>
-        <input id="phone" name="phone" type="tel" inputmode="tel"
-               placeholder="+63 912 345 6789"
-               autocomplete="tel"
-               maxlength="20"
-               pattern="^\+?[0-9\s\-()]{7,20}$" />
-      </div>
-
-      <!-- CSRF-ish double-submit cookie (server should verify) -->
-      <input type="hidden" id="csrf" name="csrf" />
-
-      <div class="actions">
-        <button id="submitBtn" type="submit" class="btn">Submit</button>
-        <span id="msg" class="msg" aria-live="polite"></span>
-      </div>
-    </form>
-
-    <div class="footer">Powered by Google Apps Script &amp; Sheets</div>
+    </div>
   </main>
+
+  <!-- ======================================================
+      THANK YOU (state 3) — separate view
+      Only a logo image; background matches State 2
+  ====================================================== -->
+  <main id="view-thanks" class="view s3-root" aria-label="Thank you">
+    <div class="center-wrap">
+      <section class="center-content">
+        <!-- The only visual element in State 3 -->
+        <img
+          src="assets/Thanks.png"
+          alt="Thank you"
+          class="thanks-img thanks-pop"
+        />
+      </section>
+      <!-- Keep footer optional; usually hidden for this view -->
+      <!-- <footer class="brand-footer"><img src="assets/logo.svg" alt=""></footer> -->
+    </div>
+  </main>
+
+
+
+  <!-- State manager (handles stacked slide + hotkeys 1/2/3) -->
+  <script src="state.js"></script>
+  <!-- Validation + submit (calls AppState.goTo('thanks') on success) -->
+  <script src="script.js"></script>
 </body>
 </html>
