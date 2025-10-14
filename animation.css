@@ -13,7 +13,7 @@
   --anim-enter-dur: 700ms;            /* form card fall-in */
   --anim-leave-dur: 700ms;            /* form card exit-up */
   --anim-bg-dur:    600ms;            /* shared bg fade-in */
-  --anim-pop-dur:   420ms;            /* Thanks image pop */
+  --anim-pop-dur:   320ms;            /* Thanks image pop */
 
   --ease-fall:      cubic-bezier(.20,.95,.20,1.00);
   --ease-leave:     cubic-bezier(.20,.95,.20,1.00);

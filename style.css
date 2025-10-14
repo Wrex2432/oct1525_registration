@@ -33,8 +33,11 @@ html, body { height: 100%; overflow: hidden; }
   /* Start button art */
   --start-btn-idle:    url("assets/Button_Eye_Idle.png");
   --start-btn-pressed: url("assets/Button_Eye_Press.png");
-  --start-btn-w: 260px;
-  --start-btn-h: 84px;
+  --start-btn-w: 360px;   /* was 260px */
+  --start-btn-h: 116px;   /* was 84px  (keeps ~same aspect) */
+
+  /* control this number: 30% … 90% works well */
+  --hero-size-pct: 124%;
 
   /* Spacing / radius / type */
   --space-1: 8px;  --space-2: 12px; --space-3: 16px; --space-4: 24px;
@@ -124,7 +127,7 @@ body {
 .check{
   display: grid;
   grid-template-columns: auto 1fr;
-  align-items: center;
+  align-items: start;
   gap: 10px;
   font-size: var(--fs-2);
   line-height: 1.25;
@@ -162,14 +165,17 @@ body {
 }
 #submitBtn{
   margin: 0 84px;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
 }
 .hero-btn{
-  width: var(--start-btn-w);
-  height: var(--start-btn-h);
-  padding: 0;
+  width: var(--hero-size-pct);
+  aspect-ratio: 260 / 84;
+  height: auto;
   background: center / contain no-repeat var(--start-btn-idle);
-  border-radius: 0;
+}
+/* pressed state still fine */
+.hero-btn.is-pressed{
+  background-image: var(--start-btn-pressed);
 }
 
 /* 5) State visuals */
@@ -190,8 +196,9 @@ body {
 }
 .s1-root .center-content{
   position: absolute;
+  width: 100%;
   left: 50%;
-  bottom: 0;
+  bottom: 15%;
   transform: translateX(-50%);
   display: grid;
   place-items: center;
@@ -236,10 +243,13 @@ body {
 }
 .s3-root .center-wrap{
   min-height: var(--pane-h);
-  display: grid;
-  grid-template-rows: 1fr auto;
+  display: flex;
+  /* grid-template-rows: 1fr auto; */
+  justify-content: center;
+  align-items: start;
   position: relative;
   z-index: 1;
+  padding-top: 7.6rem;
 }
 .s3-root .center-content{
   display: grid;
@@ -248,6 +258,7 @@ body {
 }
 .s3-root .thanks-img{
   max-width: var(--s3-img-maxw);
+  width: 16rem;
   height: auto;
   display: block;
 }
@@ -299,3 +310,21 @@ body {
 
 /* While leaving the form (card slides up), keep it on top to complete the exit */
 .stacker.form-leave .pane--form { z-index: 5; }
+
+
+/* Hidden-but-tappable restart buttons (S2/S3) */
+.restart-btn{
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 44px;
+  opacity: 1;                /* invisible */
+  background: transparent;
+  border: 0;
+  pointer-events: auto;      /* still clickable */
+  /* border: 2px solid rgb(17, 220, 81); */
+  z-index: 10000000000;
+}
+

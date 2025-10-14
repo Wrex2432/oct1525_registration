@@ -23,6 +23,15 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const raf = (fn) => requestAnimationFrame(fn);
 
+  // After existing DOM queries:
+  const RESTART_S2 = document.getElementById('restartS2');
+  const RESTART_S3 = document.getElementById('restartS3');
+
+  // Later in “Buttons” section:
+  RESTART_S2?.addEventListener('click', toIntro);
+  RESTART_S3?.addEventListener('click', toIntro);
+
+
   function after(ms, fn) {
     const t = setTimeout(fn, ms);
     return () => clearTimeout(t);
@@ -136,11 +145,24 @@
 
   // ---------- Keyboard: 1/2/3 quick switching ----------
   window.addEventListener('keydown', (e) => {
-    if (e.repeat) return;
-    if (e.key === '1') return toIntro();
-    if (e.key === '2') return toForm();
-    if (e.key === '3') return toThanks();
-  });
+  // Require the numpad (location === 3) so top-row digits won't fire
+  if (e.location !== KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) return;
+
+  switch (e.code) {
+    case 'Numpad1':
+      e.preventDefault();
+      return toIntro();
+    case 'Numpad2':
+      e.preventDefault();
+      return toForm();
+    case 'Numpad3':
+      e.preventDefault();
+      return toThanks();
+    default:
+      // ignore other numpad keys
+      return;
+  }
+});
 
   // ---------- Form submit wiring (call toThanks on success) ----------
   if (FORM_EL) {
