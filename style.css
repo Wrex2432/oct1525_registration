@@ -110,7 +110,7 @@ body {
   gap: 22px;
   width: 100%;
   align-content: bottom;
-  margin-top: 60px; /* Adapt to the notch above iphone 14 pro max screens */
+  margin-top: 18px; /* Adapt to the notch above iphone 14 pro max screens */
 }
 .name-row{
   display: grid;
@@ -240,7 +240,7 @@ body {
 }
 .pane--form .brand-footer{
   opacity: 0; pointer-events: none;
-  height: 200px; /* hidden on form view */
+  height: 245px; /* hidden on form view */
 }
 
 /* ---------- S3: Thanks (separate view) ---------- */
