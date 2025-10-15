@@ -369,6 +369,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: nowrap;
 }
 /* Sharpie-like rough text */
 .ink-rough {
