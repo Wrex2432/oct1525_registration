@@ -172,6 +172,15 @@ form?.addEventListener('submit', async (e) => {
       body: JSON.stringify({ fullName, position, company, email, phone, csrf }),
       signal: ac.signal
     });
+    // Grab first name from common field ids/names
+    const firstNameField = document.querySelector('#firstName, #fname, [name="firstName"], [name="fname"]');
+    const submittedFirstName = `[${(firstNameField?.value || '').trim()}]`;
+
+    // Persist for the Thanks screen
+    if (submittedFirstName) {
+      sessionStorage.setItem('hp:firstName', submittedFirstName);
+    }
+
 
     // Assume success if no exception with no-cors
     form.reset();

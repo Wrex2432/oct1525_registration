@@ -119,6 +119,19 @@
     onTransitionOnce(formCard, 'transform', () => {
       clearStackerFlags();
       showView(VIEW_THANKS);
+      const thanksLine = document.getElementById('thanksFirstName');
+      if (thanksLine) {
+        const fn = sessionStorage.getItem('hp:firstName');
+        if (fn) {
+          // You said “displays the first name”—if you want copy like “Thanks, X!”
+          // change the next line to: thanksLine.textContent = `Thanks, ${fn}!`;
+          thanksLine.textContent = fn;
+          thanksLine.hidden = false;
+        } else {
+          thanksLine.hidden = true;
+        }
+      }
+
       state.current = 'thanks';
     }, 950);
   }

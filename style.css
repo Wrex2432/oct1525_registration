@@ -10,7 +10,21 @@
 html, body { height: 100%; overflow: hidden; }
 
 /* 1) Design Tokens */
+/* Load Helvetica from assets (TTC). Note: .ttc is best supported on Safari.
+   Keep fallbacks and consider converting to .woff2 for widest support. */
+@font-face{
+  font-family: "AppHelvetica";
+  src: url("./assets/Helvetica.ttc") format("truetype-collection");
+  font-weight: 100 900;      /* allow a range if the collection includes it */
+  font-style: normal;
+  font-display: swap;
+}
+
+
 :root{
+  /* Font */
+  --font-app: "AppHelvetica", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+
   /* Palette */
   --bg-app:        #EB008B;
   --card-bg:       #F3F2E4;
@@ -326,5 +340,33 @@ body {
   pointer-events: auto;      /* still clickable */
   /* border: 2px solid rgb(17, 220, 81); */
   z-index: 10000000000;
+}
+
+/* Personalized line under the Thanks image */
+.thanks-block {
+  background-color: #ec008b;
+  margin-top: 12px;
+
+}
+.thanks-line{
+  font-family: var(--font-app);
+  font-weight: 600;
+  font-size: 4.4rem;
+  line-height: 0.95;
+  text-align: center;
+  color: #f6f1e4;
+  filter: blur(5px);
+  padding: 0;
+  text-wrap: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Sharpie-like rough text */
+.ink-rough {
+  letter-spacing: 0.2px;
+  filter: url(#inkRoughSoft);
+  /* optional subtle halo so it looks like ink on paper */
+  text-shadow: 0 0 0.6px hsla(43, 50%, 93%, 0.5), 0 0 1.2px hsla(43, 50%, 93%, 0.5);
 }
 
