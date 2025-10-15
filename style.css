@@ -51,7 +51,7 @@ html, body { height: 100%; overflow: hidden; }
   --start-btn-h: 116px;   /* was 84px  (keeps ~same aspect) */
 
   /* control this number: 30% … 90% works well */
-  --hero-size-pct: 124%;
+  --hero-size-pct: 74%;
 
   /* Spacing / radius / type */
   --space-1: 8px;  --space-2: 12px; --space-3: 16px; --space-4: 24px;
@@ -212,7 +212,7 @@ body {
   position: absolute;
   width: 100%;
   left: 50%;
-  bottom: 15%;
+  bottom: 24%;
   transform: translateX(-50%);
   display: grid;
   place-items: center;
