@@ -174,7 +174,7 @@ form?.addEventListener('submit', async (e) => {
     });
     // Grab first name from common field ids/names
     const firstNameField = document.querySelector('#firstName, #fname, [name="firstName"], [name="fname"]');
-    const submittedFirstName = `[${(firstNameField?.value || '').trim()}]`;
+    const submittedFirstName = `${(firstNameField?.value || '').trim()}!`;
 
     // Persist for the Thanks screen
     if (submittedFirstName) {

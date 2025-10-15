@@ -263,7 +263,7 @@ body {
   align-items: start;
   position: relative;
   z-index: 1;
-  padding-top: 7.6rem;
+  padding-top: 2.6rem;
 }
 .s3-root .center-content{
   display: grid;
@@ -344,15 +344,23 @@ body {
 
 /* Personalized line under the Thanks image */
 .thanks-block {
-  background-color: #ec008b;
   margin-top: 12px;
-
+  position: relative;
+  
+}
+.thanks-block--bg {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  background-color: #ec008b;
+  width: 97%;
+  height: 100%;
 }
 .thanks-line{
   font-family: var(--font-app);
   font-weight: 600;
-  font-size: 4.4rem;
-  line-height: 0.95;
+  font-size: 4.8rem;
+  line-height: 0.85;
   text-align: center;
   color: #f6f1e4;
   filter: blur(5px);
