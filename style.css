@@ -178,7 +178,7 @@ body {
   cursor: pointer;
 }
 #submitBtn{
-  margin: 0 84px;
+  margin: 0 auto;
   font-size: 1.8rem;
 }
 .hero-btn{
